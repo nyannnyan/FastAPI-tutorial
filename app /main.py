@@ -1,7 +1,14 @@
-from typing import Optional
+from typing import Union
 from enum import Enum
 
 from fastapi import FastAPI
+from pydantic import BaseModel
+
+class Item(BaseModel):
+  name: str
+  description: Union[str, None] = None
+  price: float
+  tax: Union[float, None] = None
 
 class ModelName(str, Enum):
   alexnet = "alexnet"
@@ -21,6 +28,9 @@ async def get_model(model_name: ModelName):
 
   return {"model_name": model_name, "message": "Have some residuals"}
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-  return {"item_id": item_id, "q": q}
+@app.put("/items/{item_id}")
+async def create_item(item_id: int, item: Item, q: Union[str, None] = None):
+  result = {"item_id": item_id, **item.dict()}
+  if q:
+    result.update({"q": q})
+  return result
