@@ -1,7 +1,7 @@
-from typing import Union
+from typing import List, Union
 from enum import Enum
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 
 class Item(BaseModel):
@@ -28,9 +28,14 @@ async def get_model(model_name: ModelName):
 
   return {"model_name": model_name, "message": "Have some residuals"}
 
-@app.put("/items/{item_id}")
-async def create_item(item_id: int, item: Item, q: Union[str, None] = None):
-  result = {"item_id": item_id, **item.dict()}
+@app.get("/items/")
+async def read_items(
+  q: Union[str, None] = Query(default=None, 
+  title="Query string", 
+  description="Query string for the items",
+  min_length=3,
+  deprecated=True)):
+  result = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
   if q:
     result.update({"q": q})
   return result
